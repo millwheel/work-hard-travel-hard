@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { theme } from "./colors";
 import { useEffect, useState } from "react";
+import { FontAwesome } from "@expo/vector-icons";
 
 const STORAGE_KEY = "@toDos";
 
@@ -93,7 +94,7 @@ export default function App() {
               <View style={styles.toDo} key={key}>
                 <Text style={styles.toDoText}>{toDos[key].text}</Text>
                 <TouchableOpacity onPress={() => deleteToDo(key)}>
-                  <Text>❌</Text>
+                  <FontAwesome name="trash" size={22} color="grey" />
                 </TouchableOpacity>
               </View>
             ) : null
