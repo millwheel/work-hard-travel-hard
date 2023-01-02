@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { theme } from "./colors";
@@ -41,6 +42,20 @@ export default function App() {
   useEffect(() => {
     loadToDOs();
   }, []);
+  const deleteToDo = (key) => {
+    Alert.alert("Delete can't be canceled.", "Are you sure?", [
+      { text: "Cancel" },
+      {
+        text: "Delete",
+        onPress: async () => {
+          const newToDos = { ...toDos };
+          delete newToDos[key];
+          setToDos(newToDos);
+          await saveToDos(newToDos);
+        },
+      },
+    ]);
+  };
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -77,7 +92,7 @@ export default function App() {
             toDos[key].working === working ? (
               <View style={styles.toDo} key={key}>
                 <Text style={styles.toDoText}>{toDos[key].text}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
                   <Text>❌</Text>
                 </TouchableOpacity>
               </View>
