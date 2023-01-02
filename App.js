@@ -1,5 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from "react-native";
 import { theme } from "./colors";
 import { useState } from "react";
 
@@ -11,12 +18,16 @@ export default function App() {
   const work = () => setWorking(true);
   const onChangeText = (payload) => setText(payload);
   const addToDo = () => {
-    if(text===""){
-      return
+    if (text === "") {
+      return;
     }
-    
+    const newToDos = Object.assign({}, toDos, {
+      [Date.now()]: { text, work: working },
+    });
+    setToDos(newToDos);
     setText("");
-  }
+  };
+  console.log(toDos);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -40,7 +51,17 @@ export default function App() {
         </TouchableOpacity>
       </View>
       <View>
-        <TextInput onSubmitEditing={addToDo} onChangeText={onChangeText} returnKeyType="done" placeholder={working ? "Add a To Do": "Where do you want to go"} style={styles.input}/>
+        <TextInput
+          onSubmitEditing={addToDo}
+          onChangeText={onChangeText}
+          returnKeyType="done"
+          value={text}
+          placeholder={working ? "Add a To Do" : "Where do you want to go"}
+          style={styles.input}
+        />
+        <ScrollView>{Object.keys(toDos).map((key) => <View style={styles.toDo} key={key}>
+          <Text style={styles.toDoText}>{toDos[key].text}</Text>
+        </View>)}</ScrollView>
       </View>
     </View>
   );
@@ -61,12 +82,24 @@ const styles = StyleSheet.create({
     fontSize: 44,
     fontWeight: "600",
   },
-  input:{
-    backgroundColor:"white",
+  input: {
+    backgroundColor: "white",
     paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginVertical: 20,
+    fontSize: 15,
+  },
+  toDo:{
+    backgroundColor:theme.toDoBg,
+    marginBottom:10,
+    paddingVertical:20,
     paddingHorizontal:20,
-    borderRadius:20,
-    marginTop:20,
-    fontSize:15,
-  }
+    borderRadius:15,
+  },
+  toDoText:{
+    color:"white",
+    fontSize:16,
+    fontWeight:"500"
+  },
 });
