@@ -7,8 +7,11 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { theme } from "./colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const STORAGE_KEY = "@toDos";
 
 export default function App() {
   const [working, setWorking] = useState(true);
@@ -17,17 +20,27 @@ export default function App() {
   const travel = () => setWorking(false);
   const work = () => setWorking(true);
   const onChangeText = (payload) => setText(payload);
-  const addToDo = () => {
+  const saveToDos = async (toSave) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+  const loadToDOs = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+    setToDos(JSON.parse(s));
+  };
+  const addToDo = async () => {
     if (text === "") {
       return;
     }
     const newToDos = Object.assign({}, toDos, {
-      [Date.now()]: { text, work: working },
+      [Date.now()]: { text, working },
     });
     setToDos(newToDos);
+    await saveToDos(newToDos);
     setText("");
   };
-  console.log(toDos);
+  useEffect(() => {
+    loadToDOs();
+  }, []);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -59,9 +72,18 @@ export default function App() {
           placeholder={working ? "Add a To Do" : "Where do you want to go"}
           style={styles.input}
         />
-        <ScrollView>{Object.keys(toDos).map((key) => <View style={styles.toDo} key={key}>
-          <Text style={styles.toDoText}>{toDos[key].text}</Text>
-        </View>)}</ScrollView>
+        <ScrollView>
+          {Object.keys(toDos).map((key) =>
+            toDos[key].working === working ? (
+              <View style={styles.toDo} key={key}>
+                <Text style={styles.toDoText}>{toDos[key].text}</Text>
+                <TouchableOpacity>
+                  <Text>❌</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null
+          )}
+        </ScrollView>
       </View>
     </View>
   );
@@ -90,16 +112,18 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     fontSize: 15,
   },
-  toDo:{
-    backgroundColor:theme.toDoBg,
-    marginBottom:10,
-    paddingVertical:20,
-    paddingHorizontal:20,
-    borderRadius:15,
+  toDo: {
+    backgroundColor: theme.toDoBg,
+    marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  toDoText:{
-    color:"white",
-    fontSize:16,
-    fontWeight:"500"
+  toDoText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
